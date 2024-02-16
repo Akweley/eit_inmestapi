@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import Course, IMUser, Cohort, CohortMember
+from .models import IMUser, Cohort, CohortMember
+from main.models import Course
 
 # Register your models here.
 

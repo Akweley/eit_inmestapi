@@ -2,8 +2,27 @@ from django.shortcuts import render
 from django.http import JsonResponse, HttpResponse
 from django.views import View
 
+from users.models import IMUser
+
 
 # Create your views here.
+
+def signup(request):
+    username = request.POST["username"]
+    first_name = request.POST["first_name"]
+    last_name = request.POST["last_name"]
+    phone_number = request.POST["phone_number"]
+    password = request.POST["password"]
+
+    new_user = IMUser.objects.create(
+        username = username,
+        first_name = first_name,
+        last_name = last_name,
+        phone_number = phone_number
+    )
+    new_user.set_password(password)
+    new_user.save()
+
 
 def say_hello(req):
     return HttpResponse("<h1>Hello Fleur</h1>")
@@ -42,6 +61,7 @@ def filter_queries(req,id):
     )
     
 class QueryView(View):  
+
     queries = [
         {"id": 1,"title": "Adama declined Val shots"},
         {"id": 2,"title": "Adama declined Val shots"},
@@ -51,3 +71,5 @@ class QueryView(View):
     
     def post(self, request):
         return JsonResponse({"status" : "ok"})
+    
+
