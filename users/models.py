@@ -1,5 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.dispatch import receiver
+from django.db.models.signals import post_save
+from rest_framework.authtoken.models import Token
 
 # Create your models here.
 
@@ -14,12 +17,30 @@ class IMUser(AbstractUser):
     last_name = models.CharField(max_length=155, blank=True)
     middle_name = models.CharField(max_length=155, blank=True)
     phone_number = models.CharField(max_length=20, blank=True)
+    unique_code = models.CharField(max_length=20, blank=True)
     user_type = models.CharField(max_length=20, choices=USER_TYPES, default='EIT')
     date_updated = models.DateTimeField(auto_now=True)
     date_created = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField()
+    is_blocked = models.BooleanField()
+    temporal_login_failed = models.IntegerField(default=False)
+    temporal_signup_failed = models.IntegerField(default=False)
+    is_blocked = models.BooleanField(default=False)
+    permanent_login_fail = models.IntegerField(default=0)
+    #perform migration
+    #update the login endpoint to check if a user is active. if false, tell user "inactive"
+    #check if user is blocked. 
+    #if a user login attempt fails, update temporal_login_field by +1
+
     
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
+    
+@receiver(post_save, sender=IMUser)
+def generate_auth_token(sender, instance=None, created=False, **kwargs):
+    if created:
+        token = Token.objects.create(user=instance)
+        token.save()
 
 class Cohort(models.Model):
     name = models.CharField(max_length=255)
